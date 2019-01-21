@@ -112,7 +112,7 @@ L = 21
 sig1 = v #0.015
 
 stage1 = denoiseImage(noisedImage, K, L, sig1)
-print("PSNR1:", compare_psnr(stage2, originalImage))
+print("PSNR1:", compare_psnr(stage1, originalImage))
 io.imsave('campus/campus_greyscale_denoised_1_step.jpg', stage1)
 
 sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
