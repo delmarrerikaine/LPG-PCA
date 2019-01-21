@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from skimage import io
 from skimage.measure import compare_psnr
 from multiprocessing import Pool
+import os
 
 def clip(img):
     img = np.minimum(np.ones(img.shape), img)
@@ -75,50 +76,58 @@ def denoise(img, x, y, K, L, sig):
     X1 = PX.T @ Y1 + mean
     return X1[m//2]
 
-# def denoiseRow(img, x, left_y, right_y, K, L, sig, outImg):
-#     print(x)
-#     for y in range(left_y, right_y):
-#         outImg[x, y] = denoise(img, x, y, K, L, sig)
+def denoiseRow(img, x, left_y, right_y, K, L, sig):
+    print(x)
+    return (x, left_y, right_y, 
+            [denoise(img, x, y, K, L, sig) for y in range(left_y, right_y)])
 
 def denoiseImage(img, K, L, sig):
+    global outImg
+
     outImg = np.copy(img)
     width, height = img.shape
     halfL = L // 2
 
+    def denoiseRowCallback(result):
+        global outImg
+
+        x, y_left, y_right, data = result
+        outImg[x, y_left:y_right] = data
+
     # parallel
-    # done = [pool.apply_async(denoiseRow, (img, x, halfL, height - halfL, K, L, sig, outImg,)) for x in range(halfL, width - halfL)]
-    # for each in done:
-    #     each.wait()
+    progress = [pool.apply_async(denoiseRow, (img, x, halfL, height - halfL, K, L, sig,), callback=denoiseRowCallback) for x in range(halfL, width - halfL)]
+    for each in progress:
+        each.wait()
 
     # non-parallel:
-    for x in range(halfL, width - halfL):
-        print(x)
-        for y in range(halfL, height - halfL):
-            outImg[x, y] = denoise(img, x, y, K, L, sig)
+    # for x in range(halfL, width - halfL):
+    #     print(x)
+    #     for y in range(halfL, height - halfL):
+    #         outImg[x, y] = denoise(img, x, y, K, L, sig)
 
     return outImg
 
 ############ main #################
-# if __name__ == '__main__':
-    # pool = Pool(4)
+if __name__ == '__main__':
+    pool = Pool(os.cpu_count())
 
-originalImage = readImg('campus/campus_greyscale.png')
+    originalImage = readImg('campus/campus_greyscale.png')
 
-v = 20/255.0
-noisedImage = readImg('campus/campus_greyscale_noise.jpg')
+    v = 20/255.0
+    noisedImage = readImg('campus/campus_greyscale_noise.jpg')
 
-K = 5
-L = 21
-sig1 = v #0.015
+    K = 5
+    L = 21
+    sig1 = v #0.015
 
-stage1 = denoiseImage(noisedImage, K, L, sig1)
-print("PSNR1:", compare_psnr(stage1, originalImage))
-io.imsave('campus/campus_greyscale_denoised_1_step.jpg', stage1)
+    stage1 = denoiseImage(noisedImage, K, L, sig1)
+    print("PSNR1:", compare_psnr(stage1, originalImage))
+    io.imsave('campus/campus_greyscale_denoised_1_step.jpg', stage1)
 
-sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
-print("Sig2: ", sig2)
+    sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
+    print("Sig2: ", sig2)
 
-stage2 = denoiseImage(stage1, K, L, sig2)
+    stage2 = denoiseImage(stage1, K, L, sig2)
 
-print("PSNR2:", compare_psnr(stage2, originalImage))
-io.imsave('campus/campus_greyscale_denoised_2_step.jpg', stage2)
+    print("PSNR2:", compare_psnr(stage2, originalImage))
+    io.imsave('campus/campus_greyscale_denoised_2_step.jpg', stage2)
