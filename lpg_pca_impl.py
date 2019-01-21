@@ -1,32 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from skimage import io
-from skimage.measure import compare_psnr
 from multiprocessing import Pool
 import os
-from timeit import default_timer as timer
 
-def clip(img):
-    img = np.minimum(np.ones(img.shape), img)
-    img = np.maximum(np.zeros(img.shape), img)
-    return img
-
-def readImg(path):
-    return io.imread(path, as_gray = True).astype('float64')
-
-def showImg(img, name):
-    print(name)
-    img = clip(img)
-    io.imshow((img*255.0).astype('uint8'))
-
-def getNoisedImage(oI, v):
-    np.random.seed(42)
-    noise = np.random.normal(size = originalImage.shape)
-    noise = noise/np.sqrt(np.power(noise, 2).mean())
-    noisedImage = oI + v*noise
-    return noisedImage
-
-def denoise(img, x, y, K, L, sig):
+def _denoise_pixel(img, x, y, K, L, sig):
     def getBlock(x, y):#img, halfK, x, y
         return img[x - halfK: x + halfK + 1, y - halfK: y + halfK + 1]
     def mse(block):
@@ -77,12 +53,13 @@ def denoise(img, x, y, K, L, sig):
     X1 = PX.T @ Y1 + mean
     return X1[m//2]
 
-def denoiseRow(img, x, left_y, right_y, K, L, sig):
-    # print(x)
+def _denoise_row(img, x, left_y, right_y, K, L, sig, log):
+    if log:
+        print(x)
     return (x, left_y, right_y, 
-            [denoise(img, x, y, K, L, sig) for y in range(left_y, right_y)])
+            [_denoise_pixel(img, x, y, K, L, sig) for y in range(left_y, right_y)])
 
-def denoiseImage(img, K, L, sig):
+def _denoise_image(img, K, L, sig, log):
     global outImg
 
     outImg = np.copy(img)
@@ -95,53 +72,33 @@ def denoiseImage(img, K, L, sig):
         x, y_left, y_right, data = result
         outImg[x, y_left:y_right] = data
 
+    global pool
+
     # parallel
-    progress = [pool.apply_async(denoiseRow, (img, x, halfL, height - halfL, K, L, sig,), callback=denoiseRowCallback) for x in range(halfL, width - halfL)]
+    progress = [pool.apply_async(_denoise_row, (img, x, halfL, height - halfL, K, L, sig, log,), callback=denoiseRowCallback) for x in range(halfL, width - halfL)]
     for each in progress:
         each.wait()
 
     # non-parallel:
     # for x in range(halfL, width - halfL):
-    #     print(x)
+    #     if log:
+    #         print(x)
     #     for y in range(halfL, height - halfL):
-    #         outImg[x, y] = denoise(img, x, y, K, L, sig)
+    #         outImg[x, y] = denoise_pixel_internal(img, x, y, K, L, sig)
 
     return outImg
 
-############ main #################
-if __name__ == '__main__':
+def denoise(noised_img, sig1, K=5, L=21, log=False):
+    global pool
 
-    pool = Pool(os.cpu_count() - 3)
+    pool = Pool(os.cpu_count() - 1)
 
-    originalImage = readImg('campus/Lena512.png')
+    stage1 = _denoise_image(noised_img, K, L, sig1, log)
 
-    v = 20/255.0
-    noisedImage = readImg('campus/Lena512_noi_s25.png')
+    sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noised_img)**2))
+    if log:
+        print('sig2 = ', sig2)
 
-    K = 5
-    L = 21
-    sig1 = v #0.015
+    stage2 = _denoise_image(stage1, K, L, sig2, log)
 
-    print(str("sig1").ljust(23), str("coef").ljust(20), str("psnr2").ljust(20), str("seconds").ljust(20))
-
-    for sig1 in np.logspace(-3, -1, 10):
-    # for sig1 in [v]:
-        for coef in np.logspace(-2, 1/3, 10):
-        # for coef in [0.35]:
-
-            start = timer()
-
-            stage1 = denoiseImage(noisedImage, K, L, sig1)
-            io.imsave('campus/Lena512_denoised_1_step.png', stage1)
-
-            sig2 = coef * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
-            # print('sig2 = ', sig2)
-
-            stage2 = denoiseImage(stage1, K, L, sig2)
-            io.imsave('campus/Lena512_denoised_2_step.png', stage2)
-
-            end = timer()
-
-            psnr1 = compare_psnr(stage1, originalImage)
-            psnr2 = compare_psnr(stage2, originalImage)
-            print(str(sig1).ljust(23), str(coef).ljust(20), str(psnr2).ljust(20), str(end - start).ljust(20))
+    return stage2
