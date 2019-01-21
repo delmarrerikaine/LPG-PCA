@@ -4,6 +4,7 @@ from skimage import io
 from skimage.measure import compare_psnr
 from multiprocessing import Pool
 import os
+from timeit import default_timer as timer
 
 def clip(img):
     img = np.minimum(np.ones(img.shape), img)
@@ -11,7 +12,7 @@ def clip(img):
     return img
 
 def readImg(path):
-    return io.imread(path, as_gray = True).astype('float64')/255.0
+    return io.imread(path, as_gray = True).astype('float64')
 
 def showImg(img, name):
     print(name)
@@ -77,7 +78,7 @@ def denoise(img, x, y, K, L, sig):
     return X1[m//2]
 
 def denoiseRow(img, x, left_y, right_y, K, L, sig):
-    print(x)
+    # print(x)
     return (x, left_y, right_y, 
             [denoise(img, x, y, K, L, sig) for y in range(left_y, right_y)])
 
@@ -109,25 +110,38 @@ def denoiseImage(img, K, L, sig):
 
 ############ main #################
 if __name__ == '__main__':
-    pool = Pool(os.cpu_count())
 
-    originalImage = readImg('campus/campus_greyscale.png')
+    pool = Pool(os.cpu_count() - 3)
+
+    originalImage = readImg('campus/Lena512.png')
 
     v = 20/255.0
-    noisedImage = readImg('campus/campus_greyscale_noise.jpg')
+    noisedImage = readImg('campus/Lena512_noi_s25.png')
 
     K = 5
     L = 21
     sig1 = v #0.015
 
-    stage1 = denoiseImage(noisedImage, K, L, sig1)
-    print("PSNR1:", compare_psnr(stage1, originalImage))
-    io.imsave('campus/campus_greyscale_denoised_1_step.jpg', stage1)
+    print(str("sig1").ljust(23), str("coef").ljust(20), str("psnr2").ljust(20), str("seconds").ljust(20))
 
-    sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
-    print("Sig2: ", sig2)
+    for sig1 in np.logspace(-3, -1, 10):
+    # for sig1 in [v]:
+        for coef in np.logspace(-2, 1/3, 10):
+        # for coef in [0.35]:
 
-    stage2 = denoiseImage(stage1, K, L, sig2)
+            start = timer()
 
-    print("PSNR2:", compare_psnr(stage2, originalImage))
-    io.imsave('campus/campus_greyscale_denoised_2_step.jpg', stage2)
+            stage1 = denoiseImage(noisedImage, K, L, sig1)
+            io.imsave('campus/Lena512_denoised_1_step.png', stage1)
+
+            sig2 = coef * np.sqrt(sig1 - np.mean((stage1 - noisedImage)**2))
+            # print('sig2 = ', sig2)
+
+            stage2 = denoiseImage(stage1, K, L, sig2)
+            io.imsave('campus/Lena512_denoised_2_step.png', stage2)
+
+            end = timer()
+
+            psnr1 = compare_psnr(stage1, originalImage)
+            psnr2 = compare_psnr(stage2, originalImage)
+            print(str(sig1).ljust(23), str(coef).ljust(20), str(psnr2).ljust(20), str(end - start).ljust(20))
