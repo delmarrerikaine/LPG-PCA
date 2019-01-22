@@ -23,5 +23,9 @@ def showImg(img, name):
     img = clip(img)
     io.imshow((img*255.0).astype('uint8'))
 
+def saveImg(img, path):
+    img = clip(img)
+    io.imsave(path, (img*255.0).astype('uint8'))
+
 def compare_psnr(img1, img2):
     return measure.compare_psnr(img1, img2)

@@ -19,10 +19,11 @@ def _denoise_pixel(img, x, y, K, L, sig):
     target = getBlock(x, y)
     
     # Assemble a pool of blocks.
+    dim1, dim2 = img.shape
     blocks = []
     rng = halfL - halfK
-    for ty in range(y-rng, y+rng+1):
-        for tx in range(x-rng, x+rng+1):
+    for ty in range(max(K, y-rng), min(y+rng+1, dim1-K)):
+        for tx in range(max(K, x-rng), min(x+rng+1, dim2-K)):
             # Exclude target
             if tx == x and ty == y:
                 continue
@@ -32,6 +33,8 @@ def _denoise_pixel(img, x, y, K, L, sig):
     blocks.sort(key = mse)
 
     # Construct the training matrix with the target and the best blocks reshaped into columns.
+    if len(blocks)<n:
+        n = len(blocks)
     trainingMatrix = np.hstack((target.reshape(m, 1, order='F'), 
                                 np.transpose([np.array(block).reshape(m, order='F') for block in blocks[:n]])))
 
@@ -65,6 +68,7 @@ def _denoise_image(img, K, L, sig, log):
     outImg = np.copy(img)
     width, height = img.shape
     halfL = L // 2
+    halfK = K // 2
 
     def denoiseRowCallback(result):
         global outImg
@@ -75,23 +79,23 @@ def _denoise_image(img, K, L, sig, log):
     global pool
 
     # parallel
-    progress = [pool.apply_async(_denoise_row, (img, x, halfL, height - halfL, K, L, sig, log,), callback=denoiseRowCallback) for x in range(halfL, width - halfL)]
+    progress = [pool.apply_async(_denoise_row, (img, x, halfK, height - halfK, K, L, sig, log,), callback=denoiseRowCallback) for x in range(halfK, width - halfK)]
     for each in progress:
         each.wait()
 
     # non-parallel:
-    # for x in range(halfL, width - halfL):
+    # for x in range(0, width):
     #     if log:
     #         print(x)
-    #     for y in range(halfL, height - halfL):
-    #         outImg[x, y] = denoise_pixel_internal(img, x, y, K, L, sig)
+    #     for y in range(0, height):
+    #         outImg[x, y] = _denoise_pixel(img, x, y, K, L, sig)
 
     return outImg
 
-def denoise(noised_img, sig1, K=5, L=21, log=False):
+def denoise(noised_img, sig1, K=7, L=21, log=False):
     global pool
 
-    pool = Pool(os.cpu_count() - 1)
+    pool = Pool(os.cpu_count() - 2)
 
     stage1 = _denoise_image(noised_img, K, L, sig1, log)
 
