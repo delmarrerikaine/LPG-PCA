@@ -92,10 +92,10 @@ def _denoise_image(img, K, L, sig, log):
 
     return outImg
 
-def denoise(noised_img, sig1, K=7, L=21, log=False):
+def denoise(noised_img, sig1, K=3, L=21, log=False):
     global pool
 
-    pool = Pool(os.cpu_count() - 2)
+    pool = Pool(os.cpu_count() - 1)
 
     stage1 = _denoise_image(noised_img, K, L, sig1, log)
 

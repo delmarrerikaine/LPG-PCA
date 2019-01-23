@@ -29,3 +29,6 @@ def saveImg(img, path):
 
 def compare_psnr(img1, img2):
     return measure.compare_psnr(img1, img2)
+
+def compare_ssim(img1, img2):
+    return measure.compare_ssim(img1, img2)
