@@ -15,7 +15,7 @@ if __name__ == '__main__':
     for img_name in img_names:
 
         name = os.path.splitext(img_name)[0]
-        if name in ['barbara', 'boat', 'cameraman', 'couple']:
+        if name in ['barbara', 'boat', 'cameraman', 'couple', 'fingerprint', 'hill', 'house', 'lena', 'man']:
             continue
 
         original_img = readImg(os.path.join('images', img_name))
