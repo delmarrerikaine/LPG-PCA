@@ -40,6 +40,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{url}
+\usepackage{booktabs}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -151,6 +152,7 @@ In this project, we implement the efficient image denoising algorithm which uses
     \item Local pixel grouping allows to better preserve local features such as edges. Pixel and its neighbors are modelled as vector variable. And samples for that variable are taken from the local window by using block matching LPG. 
     \item The algorithm may be applied more than one time (original paper uses two) which improve results. 
 \end{itemize}
+
 \textbf{The disadvantages are:}
 \begin{itemize}
     \item Slow computations 1-2 minutes for the 256x256 image. For color images the training samples selected in local window L x L x 3 which increase computational costs.
@@ -191,15 +193,9 @@ The success of the solution (the algorithm implementation) defines by what PSNR 
 
 \section{Solution}
 
-We choose LPG-PCA algorithm in order to resolve task of denoising of white additive noise with preservation of edges structure. This algorithm based on the assumption that valuable signal in image is concentrated on a small local part of image, but the noise is evenly distributed across the image. 
+We choose LPG-PCA algorithm in order to resolve task of denoising of the \emph{white additive noise} with preservation of edges structure. This algorithm based on the assumption that valuable signal in image is concentrated on a small local part of image, but the noise is evenly distributed across entire image. 
 
-In order to exploit this idea, the Local pixel grouping used. Which model pixel which should be denoised and block of surrounding pixels as an vector variable. Training samples for this variable is similar blocks from neighborhood of target block. After that, training matrix with most similar blocks, represented as vectors, moved to the PCA domain, where signal and noise can be better distinguished. This is achieved by following operations: We decentralize an datased…
-TODO: 
-\begin{itemize}
-    \item choose one algorithm, describe what it does; give its pseudocode
-    \item discuss complexity, its limitations
-    \item implement the algorithm numerically in Python, Matlab, R, ...
-\end{itemize}
+In order to exploit this idea, the Local pixel grouping is used. With this technique we model pixel, which should be denoised, and block of surrounding pixels as an vector variable. Training samples for this variable is similar blocks from neighborhood of target block. After that, training matrix with most similar blocks, represented as vectors, moved to the PCA domain. Where signal and noise can be better distinguished. This is achieved by following set of operations in the pseudocode below. Please NOTE that this code matches our numerical implementation in Python \cite{our_github}, and variable names matches original paper notation \cite{zhang2010two}.
 
 \subsection{Pseudocode}
 \begin{lstlisting}[escapeinside={(*}{*)}]
@@ -268,7 +264,108 @@ for pixel in pixels:
 \section{Evaluation}
 In the proposed LPG-PCA denoising algorithm, most of the computational cost spends on LPG grouping and PCA transformation, and thus the complexity mainly depends on two parameters: the size K of the variable block and the size L of training block. In LPG grouping, it requires $(2K^2−1) \cdot (L−K+1)^2$ additions, $K^2 \cdot (L−K+1)^2$ multiplications and $(L−K+1)^2$ "less than" logic operations. \cite{zhang2010two} 
 
-<here are all images noised / lpg-pca denoised> 
+\begin{tabular}{lrrrrr}
+\toprule
+image&sigma&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+barbara&10&28.379&27.540&27.962&32.772\\
+barbara&20&26.929&25.743&27.594&28.966\\
+barbara&30&25.680&23.905&26.754&27.032\\
+barbara&40&24.522&22.245&25.511&25.558\\
+boat&10&26.753&26.731&26.689&33.772\\
+boat&20&25.652&25.114&26.427&30.070\\
+boat&30&24.633&23.438&25.780&28.268\\
+boat&40&23.678&21.882&24.735&26.613\\
+cameraman&10&27.257&26.558&29.132&34.737\\
+cameraman&20&26.200&25.033&28.579&30.931\\
+cameraman&30&25.175&23.351&27.516&28.874\\
+cameraman&40&24.162&21.796&26.072&27.215\\
+couple&10&26.838&26.758&26.017&36.554\\
+couple&20&25.614&25.161&25.823&32.621\\
+couple&30&24.590&23.474&25.289&30.322\\
+couple&40&23.627&21.919&24.399&27.751\\
+fingerprint&10&24.517&23.463&23.845&34.025\\
+fingerprint&20&23.346&22.252&23.494&30.422\\
+fingerprint&30&22.283&21.078&22.713&28.453\\
+fingerprint&40&21.306&19.995&21.587&26.902\\
+hill&10&28.685&28.887&26.882&36.517\\
+hill&20&27.307&26.611&26.700&33.473\\
+hill&30&26.000&24.462&26.156&31.718\\
+hill&40&24.754&22.609&25.234&30.081\\
+house&10&31.724&31.459&31.390&30.182\\
+house&20&29.903&27.944&30.845&26.202\\
+house&30&28.161&25.220&29.711&24.239\\
+house&40&26.579&23.078&28.065&22.987\\
+lena&10&29.195&29.454&28.802&32.348\\
+lena&20&27.704&26.822&28.433&28.693\\
+lena&30&26.359&24.536&27.572&26.904\\
+lena&40&25.119&22.639&26.262&25.501\\
+man&10&27.506&28.080&26.777&32.905\\
+man&20&26.312&25.975&26.545&29.554\\
+man&30&25.202&23.991&25.945&27.793\\
+man&40&24.145&22.274&24.965&26.492\\
+montage&10&27.318&27.772&31.687&32.907\\
+montage&20&26.389&26.043&30.823&29.061\\
+montage&30&25.348&24.138&29.375&27.032\\
+montage&40&24.280&22.388&27.545&25.556\\
+peppers&10&28.998&30.152&29.146&34.307\\
+peppers&20&27.559&27.243&28.626&30.879\\
+peppers&30&26.203&24.781&27.615&28.938\\
+peppers&40&24.966&22.777&26.184&27.130\\
+\bottomrule
+\end{tabular}
+
+\begin{tabular}{lrrrrr}
+\toprule
+image&sigma&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+barbara&10&0.920&0.884&0.884&0.957\\
+barbara&20&0.885&0.815&0.879&0.908\\
+barbara&30&0.846&0.731&0.861&0.868\\
+barbara&40&0.803&0.649&0.823&0.828\\
+boat&10&0.878&0.877&0.837&0.965\\
+boat&20&0.840&0.799&0.835&0.928\\
+boat&30&0.796&0.708&0.821&0.902\\
+boat&40&0.749&0.619&0.785&0.871\\
+cameraman&10&0.909&0.883&0.899&0.972\\
+cameraman&20&0.873&0.788&0.896&0.943\\
+cameraman&30&0.827&0.677&0.881&0.914\\
+cameraman&40&0.774&0.576&0.841&0.879\\
+couple&10&0.874&0.866&0.809&0.983\\
+couple&20&0.831&0.793&0.807&0.964\\
+couple&30&0.787&0.706&0.791&0.945\\
+couple&40&0.739&0.621&0.756&0.909\\
+fingerprint&10&0.898&0.881&0.850&0.970\\
+fingerprint&20&0.865&0.844&0.845&0.937\\
+fingerprint&30&0.829&0.802&0.826&0.905\\
+fingerprint&40&0.790&0.757&0.790&0.869\\
+hill&10&0.889&0.890&0.811&0.969\\
+hill&20&0.852&0.814&0.809&0.947\\
+hill&30&0.807&0.721&0.793&0.930\\
+hill&40&0.754&0.629&0.756&0.910\\
+house&10&0.942&0.913&0.927&0.976\\
+house&20&0.909&0.811&0.923&0.937\\
+house&30&0.864&0.696&0.906&0.898\\
+house&40&0.810&0.589&0.864&0.863\\
+lena&10&0.931&0.921&0.904&0.949\\
+lena&20&0.896&0.834&0.900&0.893\\
+lena&30&0.854&0.734&0.882&0.850\\
+lena&40&0.806&0.637&0.842&0.808\\
+man&10&0.885&0.891&0.831&0.950\\
+man&20&0.849&0.814&0.828&0.899\\
+man&30&0.808&0.723&0.813&0.858\\
+man&40&0.762&0.634&0.776&0.819\\
+montage&10&0.950&0.933&0.951&0.960\\
+montage&20&0.914&0.833&0.945&0.914\\
+montage&30&0.867&0.717&0.925&0.870\\
+montage&40&0.813&0.610&0.882&0.827\\
+peppers&10&0.935&0.930&0.918&0.967\\
+peppers&20&0.904&0.847&0.913&0.941\\
+peppers&30&0.864&0.747&0.895&0.916\\
+peppers&40&0.818&0.650&0.856&0.881\\
+\bottomrule
+\end{tabular}
+
 <insert tools and environment> 
 
 We compared 4 algorithms: LPG-PCA, median filter, NLM and BM3D on a set of 11 monochrome pictures with different $\sigma$ = [10, 20, 30, 40]: 
@@ -284,12 +381,19 @@ Results are: <insert results>
 
 The obtained result has the same accuracy as in the origin work but runs a lot faster. 
 
-<What can be improved> 
-<What cannot be improved> 
+\textbf{What can be improved:}
+\begin{itemize}
+    \item Since we work only with monochrome images, and LPG-PCA algorithm for color images in Python could be implemented in future. 
+    \item Also, there are a lot of hyperparameters which could be tuned. As the algorithm is very parallelable, due to the fact that each pixel could be denoised separately, the next logic step is to implement it on GPUs. 
+    \item With that it can run hundreds of times faster, and this will open a whole new world of hyperparameters tuning and possible accuracy improving.
+\end{itemize}
+
+\textbf{What cannot be improved:}
+\begin{itemize}
+    \item Due to the nature of the algorithm it will not be the best option for the denoising of the images with large-grain edges, and smoothing areas.
+\end{itemize}
 
 Looking at all results, we could say, that LPG-PCA is not the fastest or most accurate algorithm, so its’ use in 2019 is unjustified.
-
-As the algorithm is very parallelable, the next logic step is to implement it on GPUs. With that it can run hundreds of times faster. Also, this implementation will open a whole new world of hyperparameters tuning and possible accuracy improving. 
 
 \bibliographystyle{unsrt}%Used BibTeX style is unsrt
 \bibliography{references}
