@@ -1,8 +1,8 @@
 from lpg_pca_impl import denoise
-from util import readImg, saveImg, getNoisedImage
+from util import readImg, saveImg, getNoisedImage, compare_psnr, compare_ssim
 import os
 
-img_name = 'fingerprint'
+img_name = 'mri'
 noise_variances = [10, 20, 30, 40]
 
 for noise_variance in noise_variances:
@@ -21,3 +21,6 @@ for noise_variance in noise_variances:
     denoised_file_name = img_name + '_denoised_' + str(noise_variance) + '.png'
     saveImg(denoised_img, os.path.join('generated', denoised_file_name))
     print(denoised_file_name + ' finished.')
+
+    print("noised PSNR: " + str(compare_psnr(original_img, noised_img)) + ", SSIM: " + str(compare_ssim(original_img, noised_img)))
+    print("denoised PSNR: " + str(compare_psnr(original_img, denoised_img)) + ", SSIM: " + str(compare_ssim(original_img, denoised_img)))
