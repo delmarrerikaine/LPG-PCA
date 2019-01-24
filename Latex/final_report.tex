@@ -299,7 +299,12 @@ Figure 2. Comparison of the different algorithms with $\sigma$=20.
 
 For the computations, we used Python 3.6. It also worth to mention that Python implementation of the BM3D works only on the Mac and Linux.\cite{pybm3d}
 
-We compared four algorithms: LPG-PCA, median filter, NLM and BM3D on the set of 12 monochrome pictures with different $\sigma$ = [10, 20, 30, 40]. Data in the table has the format PSNR(SSIM):
+We compared four algorithms: LPG-PCA, median filter, NLM and BM3D on the set of 12 monochrome pictures with different $\sigma$ = [10, 20, 30, 40].
+
+\break
+\begin{flushleft}
+Table 1. The PSNR(db) and SSIM results of the denoised images at differents noise levels and by different algorithms.
+\end{flushleft}
 
 {\tiny
 \noindent\begin{minipage}{.5\linewidth}
@@ -448,7 +453,7 @@ $\sigma$&LPG-PCA&MF&NLM&BM3D\\
 \end{minipage}
 }
 
-All images used can be found in the GitHub repository [6].
+All images used can be found in the GitHub repository \cite{our_github}.
 
 The data from table show that the LPG-PCA algorithm works well in comparison with median filter and non-local means on low noise data, but work less effective with larger noise data. In the case of the BM3D, this state of the art algorithm by our experiments is superior to all algorithms that we used in the evaluation.
 
