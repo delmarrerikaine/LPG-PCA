@@ -15,8 +15,8 @@ if __name__ == '__main__':
     for img_name in img_names:
 
         name = os.path.splitext(img_name)[0]
-        if name in ['barbara', 'boat', 'cameraman', 'couple', 'fingerprint', 'hill', 'house', 'lena', 'man']:
-            continue
+        # if name in ['barbara', 'boat', 'cameraman', 'couple', 'fingerprint', 'hill', 'house', 'lena', 'man']:
+        #     continue
 
         original_img = readImg(os.path.join('images', img_name))
 
@@ -44,10 +44,10 @@ if __name__ == '__main__':
             print(row_results)
             results.append(row_results)
 
-            df = pd.read_csv('data.csv', sep='\t')
+            df = pd.read_csv('data.csv')
             df2 = pd.DataFrame([row_results], columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
             df = df.append(df2)
 
             # df = pd.DataFrame(results, columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
            
-            df.to_csv('data.csv', sep='\t', index=False)
+            df.to_csv('data.csv', index=False)
