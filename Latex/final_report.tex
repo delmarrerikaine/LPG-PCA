@@ -41,6 +41,7 @@
 \usepackage{color}
 \usepackage{url}
 \usepackage{booktabs}
+\usepackage{hyperref}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -125,31 +126,31 @@ Roman \textsc{Moiseiev}\\Teodor \textsc{Romanus}\\[1cm] % Your name
 \end{titlepage}
 
 \begin{abstract}
-In this paper we explore one of the images denoising algorithms, called LPG-PCA (Local Pixel Grouping – Principal Component Analysis). We provide self-written implementation in Python and do comparisons with another filtering images denoising algorithms. 
+In this paper, we explore one of the images denoising algorithms, called LPG-PCA (Local Pixel Grouping – Principal Component Analysis). We provide a self-written implementation in Python and do comparisons with another filtering images denoising algorithms. 
 
-Images taken with camera can have noise from a variety of sources. Further use of these images require to the noise being reduced – for aesthetic purposes as in artistic work or marketing, or for practical purposes such as computer vision. 
+Images taken with a camera can have noise from a variety of sources. Further use of these images requires the noise being reduced – for aesthetic purposes as in artistic work or marketing, or for practical purposes such as computer vision. 
 
-The motivation for selecting the PCA-based algorithm is because one of the researchers finds PCA an interesting area to do some practice in. Another researcher works in the field of Computer Vision and image processing tools are of very interest of him.
+The motivation for selecting the PCA-based algorithm is because one of the researchers finds PCA an interesting area to do some practice in. Another researcher works in the field of Computer Vision, and image processing tools are of very interest of him.
 \end{abstract}
 
 \section{Problem Setting}
 Image noise is known irritation. Images taken with both digital cameras and conventional film cameras will pick up noise from a variety of sources, such as the film grain of analog cameras, sensor noise of digital cameras or analog-to-digital image transformations.  
 
-We need to remove noise in images in several cases – for aesthetic purposes, such as artistic work or in marketing, or for practical purposes such as computer vision.  
+We need to remove noise in images in several cases – for aesthetic purposes, such as artistic work or in marketing, or practical purposes such as computer vision.  
 
-Noise can be random or white noise with an even frequency distribution, or frequency dependent noise introduced by a device's mechanism or signal processing algorithms. So, image noise can have very structure and (maybe) need a distinct algorithm for each noise origin. The most promising algorithms are those ones which efficiently deal with all image noises. 
+Noise can be random or white noise with an even frequency distribution, or frequency dependent noise introduced by a device's mechanism or signal processing algorithms. So, image noise can have very structure and (maybe) need a distinct algorithm for each noise origin. The most promising algorithms are those which efficiently deal with all image noises.
 
 \section{Related Work}
 The algorithm was first introduced in 2010 in \cite{zhang2010two}.  
 
-At the same years (2005-2010), noise removal has been extensively studied and many denoising schemes have been proposed, from the earlier smoothing filters and frequency domain denoising method to the lately developed wavelet, curvelet and ridgelet based methods, sparse representation and K-SVD methods, shape-adaptive transform, bilateral filtering, non-local mean-based methods and non-local collaborative filtering \cite{zhang2010two}. One of the recent trends is Deep Learning, which in the form of deep CNN is applied to this problem \cite{zhang2017beyond}. 
+At the same years (2005-2010), noise removal has been extensively studied and many denoising schemes have been proposed, from the earlier smoothing filters and frequency domain denoising method to the lately developed wavelet, curvelet and ridgelet based methods, sparse representation and K-SVD methods, shape-adaptive transform, bilateral filtering, non-local mean-based methods and non-local collaborative filtering \cite{zhang2010two}. One of the recent trends is Deep Learning, which in the form of deep CNN is applied to this problem. \cite{zhang2017beyond}. 
 
 \section{Approach to Solution}
 In this project, we implement the efficient image denoising algorithm which uses principal component analysis (PCA) with local pixel grouping (LPG) \cite{zhang2010two}. 
 
 \textbf{The advantages of this algorithm are:}
 \begin{itemize}
-    \item Local pixel grouping allows to better preserve local features such as edges. Pixel and its neighbors are modelled as vector variable. And samples for that variable are taken from the local window by using block matching LPG. 
+    \item Local pixel grouping allows preserving local features such as edges better. Pixel and its neighbours are modelled as vector variable. And samples for that variable are taken from the local window by using block matching LPG. 
     \item The algorithm may be applied more than one time (original paper uses two) which improve results. 
 \end{itemize}
 
@@ -162,11 +163,11 @@ In this project, we implement the efficient image denoising algorithm which uses
 \end{itemize}
 
 \subsection{Background}
-After a lot of researching we found that almost all papers regarding the theme of the research is mainly comparison-oriented: they used the implementation from the \cite{zhang2010two} and ran the algorithm against another image denoising algorithms. So, we had a very poor choice.
+After a lot of researching, we found that almost all papers regarding the theme of the research are mainly comparison-oriented: they used the implementation from the \cite{zhang2010two} and ran the algorithm against another image denoising algorithms. So, we had a poor choice.
 
-The authors’ algorithm was not very good written and documented and it was very hard to map it with the formulas from the paper. It is written in MATLAB. 
+The authors’ algorithm was not very good written and documented, and it was tough to map it with the formulas from the paper. It is written in MATLAB. 
 
-Another iteration of research got us the very good implemented and documented solution\cite{image_denoising} in the Julia programming language, which, however, was only the part of the full solution of noise reducing task. Moreover, author claimed that one picture took 26 minutes to process, and it wasn’t acceptable.
+Another iteration of research got us the very good implemented and documented solution\cite{image_denoising} in the Julia programming language, which, however, was only the part of the full solution of noise reducing task. Moreover, the author claimed that one picture took 26 minutes to process, and it wasn’t acceptable.
 
 \subsection{Transition}
 Because of all the researchers know Python, we decided to implement the LPG-PCA algorithm in Python. The algorithm should be at least the same for all these categories:
@@ -180,60 +181,61 @@ As a matter of fact, we preserved 1\textsuperscript{th} and 3\textsuperscript{rd
 \subsection{Foreground}
 The main goal of the project is to get in touch with something new in Linear Algebra field, select one algorithm, implement it and compare it with another. 
 
-Because of all that, we will be evaluating our LPG-PCA implementation with another image denoising filters: median filter, block-matching and 3D filtering (BM3D)\cite{dabov2006image}, non-local means filter (NLM) \cite{buades2005non}. We selected these filters, because they showed good denoising results in another papers. 
+Because of all that, we will be evaluating our LPG-PCA implementation with another image denoising filters: median filter, block-matching and 3D filtering (BM3D)\cite{dabov2006image}, non-local means filter (NLM) \cite{buades2005non}. We selected these filters because they showed good denoising results in other papers. 
 
 The evaluation of results will be used with the next quality estimation techniques: 
 \begin{itemize}
     \item Peak signal-to-noise ratio (PSNR) 
     \item Structural similarity index (SSIM) 
 \end{itemize}
-These image quality metrics is widely used in the papers, which defined out choice. 
+These image quality metrics are widely used in the papers, which defined out choice. 
 
 The success of the solution (the algorithm implementation) defines by what PSNR and SSIM values we get from the original MATLAB implementation and our Python implementation. 
 
 \section{Solution}
 
-We choose LPG-PCA algorithm in order to resolve task of denoising of the \emph{white additive noise} with preservation of edges structure. This algorithm based on the assumption that valuable signal in image is concentrated on a small local part of image, but the noise is evenly distributed across entire image. 
+We choose LPG-PCA algorithm in order to resolve the task of denoising of the \emph{white additive noise} with preservation of edges structure. This algorithm based on the assumption that valuable signal in the image is concentrated on a small local part of image, but the noise is evenly distributed across the entire image. 
 
-In order to exploit this idea, the Local pixel grouping is used. With this technique we model pixel, which should be denoised, and block of surrounding pixels as an vector variable. Training samples for this variable is similar blocks from neighborhood of target block. After that, training matrix with most similar blocks, represented as vectors, moved to the PCA domain. Where signal and noise can be better distinguished. This is achieved by following set of operations in the pseudocode below. Please NOTE that this code matches our numerical implementation in Python \cite{our_github}, and variable names matches original paper notation \cite{zhang2010two}.
+In order to exploit this idea, the Local pixel grouping is used. With this technique, we model pixel, which should be denoised, and the block of surrounding pixels as a vector variable. Training samples for this variable are similar blocks from the neighbourhood of the target block. After that, training matrix with most similar blocks, represented as vectors, moved to the PCA domain. Where signal and noise can be better distinguished. This is achieved by following a set of operations in the pseudocode below. Besides, that described above operations runs twice, in order to improve SSIM and visual quality of the denoised image.
+Please NOTE that this code below matches our numerical implementation in Python \cite{our_github}, and variable names match original paper notation \cite{zhang2010two}.
 
 \subsection{Pseudocode}
 \begin{lstlisting}[escapeinside={(*}{*)}]
 (*$K$*) = K; (*$L$*)=L; (*$\sigma$*)=sig
 for pixel in pixels:
-    # Get Block with length K for target pixel
+    # Get Block with length K for the target pixel
     target = getBlock(pixel.x, pixel.y)
     
-    # Length of block vector
+    # Length of the block vector
     m = (*$K^2$*)
     
-    # Desired number of vector variables for training matrix
+    # The desired number of the vector variables for the training matrix
     n = m * 8 + 1 
 
-    # Get all possible blocks in (*$L$*) window around pixel. There are (*$(L-K+1)^2$*) such blocks
+    # Get all possible blocks in (*$L$*) window around the pixel. There are (*$(L-K+1)^2$*) such blocks
     blocks = []
     for x in windowX: 
         for y in windowY:
             blocks.append(getBlock(x, y))
     
-    # Sort blocks by similarity (MSE) with target in Descending order
+    # Sort blocks by similarity (MSE) with the target in Descending order
     blocks.sort(key = 'mse', order = 'desc')
 
     # If there are less than n - desired number of vector variables we will use all of them
     if blocks.length < n:
         n = blocks.length
     
-    # Form training matrix as target and n most simmilar blocks
+    # Form training matrix as target and n most similar blocks
     (*$X_\nu$*) = concatenate(target, blocks[:n])
 
-    # Remove mean from the training matrix on the lenght of block axis
+    # Remove mean from the training matrix on the length of block axis
     (*$\mu$*) = mean((*$X_\nu$*), axis = 1)
     (*$X_\nu = X_\nu - \mu$*)
 
     # Noise covariance is (*$\sigma^2 \times I$*)
     (*$\Omega_\nu = \sigma^2I$*)
 
-    # Get eigenvectors of input covariance matrix
+    # Get eigenvectors of the input covariance matrix
     (*$\Omega_{\bar{X}_\nu}$*) = (*$\dfrac{1}{n}\bar{X}_\nu\bar{X}_\nu^\top$*)
     (*$\Phi_{\bar{X}}$*) = getEigenvectors((*$\Omega_{\bar{X}_\nu}$*))
     (*$P_{\bar{X}} = \Phi_{\bar{X}}^\top$*)
@@ -241,19 +243,19 @@ for pixel in pixels:
     # Get decorrelated dataset
     (*$\bar{Y}_\nu = P_{\bar{X}} X_\nu$*)
 
-    # Get covariance matrix of transformed noise
+    # Get the covariance matrix of the transformed noise
     (*$\Omega_{\nu_y} = P_{\bar{X}} \Omega_\nu P_{\bar{X}}^\top$*)
 
-    # Get covariance matrix of transformed input
+    # Get the covariance matrix of the transformed input
     (*$\Omega_{\bar{y}_\nu} = \dfrac{1}{n}\bar{Y}_\nu \bar{Y}_\nu^\top$*)
     
-    # Get covariance matrix of transformed denoised output
+    # Get the covariance matrix of the transformed denoised output
     (*$\Omega_{\bar{y}} = \Omega_{\bar{y}_\nu} - \Omega_{\nu_y}$*)
     
     # Get shrinkage coefficients
     (*$w = \dfrac{diag(\Omega_{\bar{y}})}{diag(\Omega_{\bar{y}}) + diag(\Omega_{y_\nu})}$*)
     
-    # Get transformed denoised output of target
+    # Get the transformed denoised output of the target
     (*$\hat{\bar{Y}} = w \cdot \bar{Y}_\nu$*)
     (*$\hat{X} = P_{\hat{X}}^\top \cdot \hat{\bar{Y}} + \mu$*)
     
@@ -262,138 +264,216 @@ for pixel in pixels:
 \end{lstlisting}
 
 \section{Evaluation}
-In the proposed LPG-PCA denoising algorithm, most of the computational cost spends on LPG grouping and PCA transformation, and thus the complexity mainly depends on two parameters: the size K of the variable block and the size L of training block. In LPG grouping, it requires $(2K^2−1) \cdot (L−K+1)^2$ additions, $K^2 \cdot (L−K+1)^2$ multiplications and $(L−K+1)^2$ "less than" logic operations. \cite{zhang2010two} 
+In the proposed LPG-PCA denoising algorithm, most of the computational cost spend on LPG grouping and PCA transformation, and thus the complexity mainly depends on two parameters: the size K of the variable block and the size L of the training block. In LPG grouping, it requires $(2K^2−1) \cdot (L−K+1)^2$ additions, $K^2 \cdot (L−K+1)^2$ multiplications and $(L−K+1)^2$ "less than" logic operations. \cite{zhang2010two} 
 
-\begin{tabular}{lrrrrr}
-\toprule
-image&sigma&LPG-PCA&MF&NLM&BM3D\\
-\midrule
-barbara&10&28.379&27.540&27.962&32.772\\
-barbara&20&26.929&25.743&27.594&28.966\\
-barbara&30&25.680&23.905&26.754&27.032\\
-barbara&40&24.522&22.245&25.511&25.558\\
-boat&10&26.753&26.731&26.689&33.772\\
-boat&20&25.652&25.114&26.427&30.070\\
-boat&30&24.633&23.438&25.780&28.268\\
-boat&40&23.678&21.882&24.735&26.613\\
-cameraman&10&27.257&26.558&29.132&34.737\\
-cameraman&20&26.200&25.033&28.579&30.931\\
-cameraman&30&25.175&23.351&27.516&28.874\\
-cameraman&40&24.162&21.796&26.072&27.215\\
-couple&10&26.838&26.758&26.017&36.554\\
-couple&20&25.614&25.161&25.823&32.621\\
-couple&30&24.590&23.474&25.289&30.322\\
-couple&40&23.627&21.919&24.399&27.751\\
-fingerprint&10&24.517&23.463&23.845&34.025\\
-fingerprint&20&23.346&22.252&23.494&30.422\\
-fingerprint&30&22.283&21.078&22.713&28.453\\
-fingerprint&40&21.306&19.995&21.587&26.902\\
-hill&10&28.685&28.887&26.882&36.517\\
-hill&20&27.307&26.611&26.700&33.473\\
-hill&30&26.000&24.462&26.156&31.718\\
-hill&40&24.754&22.609&25.234&30.081\\
-house&10&31.724&31.459&31.390&30.182\\
-house&20&29.903&27.944&30.845&26.202\\
-house&30&28.161&25.220&29.711&24.239\\
-house&40&26.579&23.078&28.065&22.987\\
-lena&10&29.195&29.454&28.802&32.348\\
-lena&20&27.704&26.822&28.433&28.693\\
-lena&30&26.359&24.536&27.572&26.904\\
-lena&40&25.119&22.639&26.262&25.501\\
-man&10&27.506&28.080&26.777&32.905\\
-man&20&26.312&25.975&26.545&29.554\\
-man&30&25.202&23.991&25.945&27.793\\
-man&40&24.145&22.274&24.965&26.492\\
-montage&10&27.318&27.772&31.687&32.907\\
-montage&20&26.389&26.043&30.823&29.061\\
-montage&30&25.348&24.138&29.375&27.032\\
-montage&40&24.280&22.388&27.545&25.556\\
-peppers&10&28.998&30.152&29.146&34.307\\
-peppers&20&27.559&27.243&28.626&30.879\\
-peppers&30&26.203&24.781&27.615&28.938\\
-peppers&40&24.966&22.777&26.184&27.130\\
-\bottomrule
+\begin{center}
+
+\end{center}
+\begin{center}
+\begin{tabular}{c c c c}
+    & noised & 1 stage & 2 stage\\
+    \rotatebox{90}{\qquad\qquad\quad$\sigma$=10} & \includegraphics[width=50mm]{lena_noised_10.png} & \includegraphics[width=50mm]{lena_interim_10.png} &
+    \includegraphics[width=50mm]{lena_denoised_10.png}\\
+    \rotatebox{90}{\qquad\qquad\quad$\sigma$=20} & \includegraphics[width=50mm]{lena_noised_20.png} & \includegraphics[width=50mm]{lena_interim_20.png} & \includegraphics[width=50mm]{lena_denoised_20.png}\\
+    \rotatebox{90}{\qquad\qquad\quad$\sigma$=30} & \includegraphics[width=50mm]{lena_noised_30.png} & \includegraphics[width=50mm]{lena_interim_30.png} & \includegraphics[width=50mm]{lena_denoised_30.png}\\
+    \rotatebox{90}{\qquad\qquad\quad$\sigma$=40} & \includegraphics[width=50mm]{lena_noised_40.png} & \includegraphics[width=50mm]{lena_interim_40.png} & \includegraphics[width=50mm]{lena_denoised_40.png}\\
 \end{tabular}
 
-\begin{tabular}{lrrrrr}
-\toprule
-image&sigma&LPG-PCA&MF&NLM&BM3D\\
-\midrule
-barbara&10&0.920&0.884&0.884&0.957\\
-barbara&20&0.885&0.815&0.879&0.908\\
-barbara&30&0.846&0.731&0.861&0.868\\
-barbara&40&0.803&0.649&0.823&0.828\\
-boat&10&0.878&0.877&0.837&0.965\\
-boat&20&0.840&0.799&0.835&0.928\\
-boat&30&0.796&0.708&0.821&0.902\\
-boat&40&0.749&0.619&0.785&0.871\\
-cameraman&10&0.909&0.883&0.899&0.972\\
-cameraman&20&0.873&0.788&0.896&0.943\\
-cameraman&30&0.827&0.677&0.881&0.914\\
-cameraman&40&0.774&0.576&0.841&0.879\\
-couple&10&0.874&0.866&0.809&0.983\\
-couple&20&0.831&0.793&0.807&0.964\\
-couple&30&0.787&0.706&0.791&0.945\\
-couple&40&0.739&0.621&0.756&0.909\\
-fingerprint&10&0.898&0.881&0.850&0.970\\
-fingerprint&20&0.865&0.844&0.845&0.937\\
-fingerprint&30&0.829&0.802&0.826&0.905\\
-fingerprint&40&0.790&0.757&0.790&0.869\\
-hill&10&0.889&0.890&0.811&0.969\\
-hill&20&0.852&0.814&0.809&0.947\\
-hill&30&0.807&0.721&0.793&0.930\\
-hill&40&0.754&0.629&0.756&0.910\\
-house&10&0.942&0.913&0.927&0.976\\
-house&20&0.909&0.811&0.923&0.937\\
-house&30&0.864&0.696&0.906&0.898\\
-house&40&0.810&0.589&0.864&0.863\\
-lena&10&0.931&0.921&0.904&0.949\\
-lena&20&0.896&0.834&0.900&0.893\\
-lena&30&0.854&0.734&0.882&0.850\\
-lena&40&0.806&0.637&0.842&0.808\\
-man&10&0.885&0.891&0.831&0.950\\
-man&20&0.849&0.814&0.828&0.899\\
-man&30&0.808&0.723&0.813&0.858\\
-man&40&0.762&0.634&0.776&0.819\\
-montage&10&0.950&0.933&0.951&0.960\\
-montage&20&0.914&0.833&0.945&0.914\\
-montage&30&0.867&0.717&0.925&0.870\\
-montage&40&0.813&0.610&0.882&0.827\\
-peppers&10&0.935&0.930&0.918&0.967\\
-peppers&20&0.904&0.847&0.913&0.941\\
-peppers&30&0.864&0.747&0.895&0.916\\
-peppers&40&0.818&0.650&0.856&0.881\\
-\bottomrule
+Figure 1. Noised image, denoised images on the 1\textsuperscript{st} and 2\textsuperscript{nd} steps of LPG-PCA.
+
+\end{center}
+
+\begin{center}
+\begin{tabular}{c c c c}
+    & house & hill & couple\\
+    \rotatebox{90}{\qquad\qquad\quad LPG-PCA} & \includegraphics[width=50mm]{house_lpg_pca_20.png} & \includegraphics[width=50mm]{hill_lpg_pca_20.png} &
+    \includegraphics[width=50mm]{couple_lpg_pca_20.png}\\
+    \rotatebox{90}{\qquad\qquad\quad MF} & \includegraphics[width=50mm]{house_mf_20.png} & \includegraphics[width=50mm]{hill_mf_20.png} & \includegraphics[width=50mm]{couple_mf_20.png}\\
+    \rotatebox{90}{\qquad\qquad\quad NLM} & \includegraphics[width=50mm]{house_nlm_20.png} & \includegraphics[width=50mm]{hill_nlm_20.png} & \includegraphics[width=50mm]{couple_nlm_20.png}\\
+    \rotatebox{90}{\qquad\qquad\quad BM3D} & \includegraphics[width=50mm]{house_bm3d_20.png} & \includegraphics[width=50mm]{hill_bm3d_20.png} & \includegraphics[width=50mm]{couple_bm3d_20.png}\\
 \end{tabular}
 
-<insert tools and environment> 
+Figure 2. Comparison of the different algorithms with $\sigma$=20.
 
-We compared 4 algorithms: LPG-PCA, median filter, NLM and BM3D on a set of 11 monochrome pictures with different $\sigma$ = [10, 20, 30, 40]: 
+\end{center}
 
-<here is the table with comparison data> 
-<insert tools and environment> 
+For the computations, we used Python 3.6. It also worth to mention that Python implementation of the BM3D works only on the Mac and Linux.\cite{pybm3d}
 
-<analysis>
+We compared four algorithms: LPG-PCA, median filter, NLM and BM3D on the set of 12 monochrome pictures with different $\sigma$ = [10, 20, 30, 40]. Data in the table has the format PSNR(SSIM):
+
+{\tiny
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&boat\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&26.75(0.88)&26.73(0.88)&26.69(0.84)&33.77(0.96)\\
+20&25.65(0.84)&25.11(0.8)&26.43(0.84)&30.07(0.93)\\
+30&24.63(0.8)&23.44(0.71)&25.78(0.82)&28.27(0.9)\\
+40&23.68(0.75)&21.88(0.62)&24.74(0.78)&26.61(0.87)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&hill\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&28.69(0.89)&28.89(0.89)&26.88(0.81)&36.52(0.97)\\
+20&27.31(0.85)&26.61(0.81)&26.7(0.81)&33.47(0.95)\\
+30&26.0(0.81)&24.46(0.72)&26.16(0.79)&31.72(0.93)\\
+40&24.75(0.75)&22.61(0.63)&25.23(0.76)&30.08(0.91)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&lena\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&29.19(0.93)&29.45(0.92)&28.8(0.9)&32.35(0.95)\\
+20&27.7(0.9)&26.82(0.83)&28.43(0.9)&28.69(0.89)\\
+30&26.36(0.85)&24.54(0.73)&27.57(0.88)&26.9(0.85)\\
+40&25.12(0.81)&22.64(0.64)&26.26(0.84)&25.5(0.81)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&house\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&31.72(0.94)&31.46(0.91)&31.39(0.93)&30.18(0.98)\\
+20&29.9(0.91)&27.94(0.81)&30.85(0.92)&26.2(0.94)\\
+30&28.16(0.86)&25.22(0.7)&29.71(0.91)&24.24(0.9)\\
+40&26.58(0.81)&23.08(0.59)&28.06(0.86)&22.99(0.86)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&mri\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&28.13(0.86)&22.42(0.87)&26.99(0.85)&32.73(0.96)\\
+20&22.11(0.66)&21.76(0.79)&26.5(0.84)&28.88(0.91)\\
+30&18.59(0.5)&20.86(0.71)&25.5(0.82)&26.82(0.87)\\
+40&16.09(0.4)&19.88(0.62)&24.12(0.78)&25.05(0.81)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&couple\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&26.84(0.87)&26.76(0.87)&26.02(0.81)&36.55(0.98)\\
+20&25.61(0.83)&25.16(0.79)&25.82(0.81)&32.62(0.96)\\
+30&24.59(0.79)&23.47(0.71)&25.29(0.79)&30.32(0.94)\\
+40&23.63(0.74)&21.92(0.62)&24.4(0.76)&27.75(0.91)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&peppers\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&29.0(0.94)&30.15(0.93)&29.15(0.92)&34.31(0.97)\\
+20&27.56(0.9)&27.24(0.85)&28.63(0.91)&30.88(0.94)\\
+30&26.2(0.86)&24.78(0.75)&27.62(0.9)&28.94(0.92)\\
+40&24.97(0.82)&22.78(0.65)&26.18(0.86)&27.13(0.88)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&montage\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&27.32(0.95)&27.77(0.93)&31.69(0.95)&32.91(0.96)\\
+20&26.39(0.91)&26.04(0.83)&30.82(0.95)&29.06(0.91)\\
+30&25.35(0.87)&24.14(0.72)&29.37(0.93)&27.03(0.87)\\
+40&24.28(0.81)&22.39(0.61)&27.54(0.88)&25.56(0.83)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&fingerprint\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&24.52(0.9)&23.46(0.88)&23.85(0.85)&34.03(0.97)\\
+20&23.35(0.86)&22.25(0.84)&23.49(0.84)&30.42(0.94)\\
+30&22.28(0.83)&21.08(0.8)&22.71(0.83)&28.45(0.9)\\
+40&21.31(0.79)&19.99(0.76)&21.59(0.79)&26.9(0.87)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&cameraman\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&27.26(0.91)&26.56(0.88)&29.13(0.9)&34.74(0.97)\\
+20&26.2(0.87)&25.03(0.79)&28.58(0.9)&30.93(0.94)\\
+30&25.17(0.83)&23.35(0.68)&27.52(0.88)&28.87(0.91)\\
+40&24.16(0.77)&21.8(0.58)&26.07(0.84)&27.21(0.88)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&man\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&27.51(0.88)&28.08(0.89)&26.78(0.83)&32.9(0.95)\\
+20&26.31(0.85)&25.98(0.81)&26.55(0.83)&29.55(0.9)\\
+30&25.2(0.81)&23.99(0.72)&25.94(0.81)&27.79(0.86)\\
+40&24.15(0.76)&22.27(0.63)&24.97(0.78)&26.49(0.82)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\noindent\begin{minipage}{.5\linewidth}
+\begin{tabular}{lrrrr}
+\toprule &&barbara\\ \midrule
+$\sigma$&LPG-PCA&MF&NLM&BM3D\\
+\midrule
+10&28.38(0.92)&27.54(0.88)&27.96(0.88)&32.77(0.96)\\
+20&26.93(0.88)&25.74(0.81)&27.59(0.88)&28.97(0.91)\\
+30&25.68(0.85)&23.9(0.73)&26.75(0.86)&27.03(0.87)\\
+40&24.52(0.8)&22.25(0.65)&25.51(0.82)&25.56(0.83)\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+}
+
+All images used can be found in the GitHub repository [6].
+
+The data from table show that the LPG-PCA algorithm works well in comparison with median filter and non-local means on low noise data, but work less effective with larger noise data. In the case of the BM3D, this state of the art algorithm by our experiments is superior to all algorithms that we used in the evaluation.
+
 \section{Conclusions}
-In this project we have explored the Local Pixel Grouping – Principal Component Analysis (LPG-PCA) algorithm. We have implemented the algorithm in Python and run its comparison with another popular algorithm. 
+In this project, we have explored the Local Pixel Grouping – Principal Component Analysis (LPG-PCA) algorithm. We have implemented the algorithm in Python and run its comparison with another popular algorithm. 
 
-Results are: <insert results> 
+In the result that LPG-PCA has it's pros, in the form of preserving edges, and cons in the form of slow computation. PSNR and SSIM in original paper were calculated with truncating 20 border pixels, which introduced some restrictions, that do not exist for non-local algorithms. In comparison, the results from the BM3D looks more convenient for images that we used.
 
-The obtained result has the same accuracy as in the origin work but runs a lot faster. 
+The obtained result has a somewhat smaller PSNR and SSIM measurements in comparison to original work but runs a lot faster. We think it may be because truncation of 20 border pixels is $\approx 28\%$ of the image. And measurements for the original paper were on truncated images, however, we performed them on the whole image. Also, original paper have complex tuned hyperparameters, which also affect quality.
 
-\textbf{What can be improved:}
+What can be improved:
+
 \begin{itemize}
-    \item Since we work only with monochrome images, and LPG-PCA algorithm for color images in Python could be implemented in future. 
-    \item Also, there are a lot of hyperparameters which could be tuned. As the algorithm is very parallelable, due to the fact that each pixel could be denoised separately, the next logic step is to implement it on GPUs. 
-    \item With that it can run hundreds of times faster, and this will open a whole new world of hyperparameters tuning and possible accuracy improving.
+    \item Since we work only with monochrome images and LPG-PCA algorithm for color images in Python could be implemented in future. 
+    \item Also, there are a lot of hyperparameters which could be tuned. As the algorithm is very parallelable, due to the fact that each pixel could be denoised separately, the next logical step is to implement it on GPUs. 
+    \item With that, it can run hundreds of times faster, and this will open a whole new world of hyperparameters tuning and possible accuracy improving.
 \end{itemize}
 
-\textbf{What cannot be improved:}
+What cannot be improved:
+
 \begin{itemize}
-    \item Due to the nature of the algorithm it will not be the best option for the denoising of the images with large-grain edges, and smoothing areas.
+    \item Due to the nature of the algorithm it will not be the best option for the denoising of the images with large-grain edges, and smooth areas.
 \end{itemize}
 
-Looking at all results, we could say, that LPG-PCA is not the fastest or most accurate algorithm, so its’ use in 2019 is unjustified.
+Looking at all results, we could say, that LPG-PCA is not the fastest or most accurate algorithm, so its’ use in 2019 is unjustified. However, an idea behind the original paper is interesting and may be reused in the future.
 
 \bibliographystyle{unsrt}%Used BibTeX style is unsrt
 \bibliography{references}
