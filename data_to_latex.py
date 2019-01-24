@@ -28,7 +28,7 @@ for image_name in list(set(df['image_name'])):
         image_text = file.read()
         image_text = image_text.replace(' ', '').replace(r'\toprule',r'\toprule &&' + image_name + r'\\ \midrule')
         image_text = r'\noindent\begin{minipage}{.5\linewidth}' + '\n' + image_text + '\n' + r'\end{minipage}'
-        image_text = image_text.replace('\n\n', '\n').replace('sigma&', '\\sigma&')
+        image_text = image_text.replace('\n\n', '\n').replace('sigma&', '$\\sigma$&')
         image_texts = np.append(image_texts, image_text)
     
     os.remove(path)
