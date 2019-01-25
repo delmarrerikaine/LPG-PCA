@@ -6,8 +6,9 @@ compare.py used for comparison of the obtained results with median filter, block
 
 In order to run the code, execute the next commands is the repository folder:
 
-`pip install -r requirements.txt`
-
-`python compare.py`
+```
+  pip install -r requirements.txt
+  python compare.py
+```
 
 [1] Lei Zhang, Weisheng Dong, David Zhang, and Guangming Shi. Two-stage image denoising by principal component analysis with local pixel grouping. Pattern Recognition, 43(4):1531-1549, 2010.
