@@ -1,5 +1,7 @@
 # LPG-PCA-PY
-Python Implementation of LPG-PCA algorithm [1]
+Python Implementation of LPG-PCA algorithm [1].
+
+keywords: local pixel grouping, principal component analysis, image denoising, computer vision
 
 Algorithm is in the lpg_pca_impl.py file. 
 compare.py used for comparison of the obtained results with median filter, block-matching and 3D filtering (BM3D), non-local means filter algorithms. For BM3D please look at original repository.
