@@ -1,6 +1,6 @@
 import lpg_pca_impl as lpg_pca
-import mf_impl as mf
-import nlm_impl as nlm
+import external.mf_impl as mf
+import external.nlm_impl as nlm
 from util import readImg, getNoisedImage, saveImg, compare_psnr, compare_ssim
 import os
 import pandas as pd
@@ -44,10 +44,12 @@ if __name__ == '__main__':
             print(row_results)
             results.append(row_results)
 
+            # append to 'data.csv' if it exists
             df = pd.read_csv('data.csv')
             df2 = pd.DataFrame([row_results], columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
             df = df.append(df2)
 
+            # create new file 'data.csv'
             # df = pd.DataFrame(results, columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
            
             df.to_csv('data.csv', index=False)
