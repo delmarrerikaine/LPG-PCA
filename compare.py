@@ -51,5 +51,5 @@ if __name__ == '__main__':
 
             # create new file 'data.csv'
             # df = pd.DataFrame(results, columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
-           
+
             df.to_csv('data.csv', index=False)
