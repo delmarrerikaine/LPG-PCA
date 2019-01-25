@@ -100,7 +100,7 @@ def _denoise_image(img, K, L, sig, log):
 def denoise(noised_img, sig1, K=3, L=21, log=False):
     global pool
 
-    pool = Pool(os.cpu_count() - 1)
+    pool = Pool(os.cpu_count() - 1) # don't use all cores, your UI may start to lag
 
     stage1 = _denoise_image(noised_img, K, L, sig1, log)
 

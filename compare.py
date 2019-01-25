@@ -5,20 +5,25 @@ from util import readImg, getNoisedImage, saveImg, compare_psnr, compare_ssim
 import os
 import pandas as pd
 
+data_file_name = r'data.csv'
+images_folder = r'images'
+
 if __name__ == '__main__':
 
     noise_variances = [10.0, 20.0, 30.0, 40.0]
     results = []
 
-    img_names = os.listdir(os.path.join(os.path.dirname(__file__), 'images'))
+    img_names = os.listdir(os.path.join(os.path.dirname(__file__), images_folder))
 
     for img_name in img_names:
 
         name = os.path.splitext(img_name)[0]
-        if name in ['barbara', 'boat', 'cameraman', 'couple', 'fingerprint', 'hill', 'house', 'lena', 'man', 'montage', 'peppers']:
-            continue
 
-        original_img = readImg(os.path.join('images', img_name))
+        # to skip some images
+        # if name in ['barbara', 'boat', 'cameraman', 'couple', 'fingerprint', 'hill', 'house', 'lena', 'man', 'montage', 'peppers']:
+        #     continue
+
+        original_img = readImg(os.path.join(images_folder, img_name))
 
         for noise_variance in noise_variances:
             corrected_noise_variance = noise_variance / 255
@@ -44,12 +49,13 @@ if __name__ == '__main__':
             print(row_results)
             results.append(row_results)
 
-            # append to 'data.csv' if it exists
-            df = pd.read_csv('data.csv')
-            df2 = pd.DataFrame([row_results], columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
-            df = df.append(df2)
+            cols = ['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm']
+            df_prev = pd.DataFrame([], columns=cols)
 
-            # create new file 'data.csv'
-            # df = pd.DataFrame(results, columns=['image_name', 'sigma', 'noise_psnr', 'noise_ssim', 'denoise_psnr_lpg_pca', 'denoise_ssim_lpg_pca', 'denoise_psnr_mf', 'denoise_ssim_mf', 'denoise_psnr_nlm', 'denoise_ssim_nlm'])
+            if(os.path.isfile(data_file_name)):
+                df_prev = pd.read_csv(data_file_name)
 
-            df.to_csv('data.csv', index=False)
+            df_add = pd.DataFrame([row_results], columns=cols)
+            df_full = df_prev.append(df_add)
+
+            df_full.to_csv(data_file_name, index=False)
