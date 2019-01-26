@@ -1,14 +1,15 @@
 import numpy as np
 from multiprocessing import Pool
 import os
+from sklearn.feature_extraction import image
 
 
 def _denoise_pixel(img, x, y, K, L, sig):
     def getBlock(x, y):
         return img[x - halfK: x + halfK + 1, y - halfK: y + halfK + 1]
 
-    def mse(block):
-        return np.mean((block - target)**2)
+    # def mse(block):
+    #     return np.mean((block - target)**2)
     halfK = K//2
     halfL = L//2
     # Dimension of each block vector (= number of rows in the training matrix)
@@ -22,23 +23,36 @@ def _denoise_pixel(img, x, y, K, L, sig):
 
     # Assemble a pool of blocks.
     dim1, dim2 = img.shape
-    blocks = []
     rng = halfL - halfK
-    for ty in range(max(K, y-rng), min(y+rng+1, dim1-K)):
-        for tx in range(max(K, x-rng), min(x+rng+1, dim2-K)):
-            # Exclude target
-            if tx == x and ty == y:
-                continue
-            block = getBlock(tx, ty)
-            blocks.append(block)
-
-    blocks.sort(key=mse)
+    blocks = image.extract_patches_2d(
+        img[max(K, x - rng) - halfK : min(x + rng + 1, dim2 - K) + halfK,
+        max(K, y - rng) - halfK : min(y + rng + 1, dim1 - K) + halfK], (K, K))
+    
+    # Sort by MSE
+    sortIndexes = ((blocks - target)**2).reshape(blocks.shape[0], m, order = 'F').mean(axis = 1).argsort()
 
     # Construct the training matrix with the target and the best blocks reshaped into columns.
-    if len(blocks) < n:
-        n = len(blocks)
-    trainingMatrix = np.hstack((target.reshape(m, 1, order='F'),
-                                np.transpose([np.array(block).reshape(m, order='F') for block in blocks[:n]])))
+    trainingMatrix = blocks[sortIndexes].reshape(blocks.shape[0], m, order = 'F').swapaxes(1, 0)[:,:n+1]
+
+#    # Assemble a pool of blocks.
+#    dim1, dim2 = img.shape
+#    blocks = []
+#    rng = halfL - halfK
+#    for ty in range(max(K, y-rng), min(y+rng+1, dim1-K)):
+#        for tx in range(max(K, x-rng), min(x+rng+1, dim2-K)):
+#            # Exclude target
+#            if tx == x and ty == y:
+#                continue
+#            block = getBlock(tx, ty)
+#            blocks.append(block)
+#
+#    blocks.sort(key=mse)
+#
+#    # Construct the training matrix with the target and the best blocks reshaped into columns.
+#    if len(blocks) < n:
+#        n = len(blocks)
+#    trainingMatrix = np.hstack((target.reshape(m, 1, order='F'),
+#                                np.transpose([np.array(block).reshape(m, order='F') for block in blocks[:n]])))
 
     mean = trainingMatrix.mean(axis=1)
     trainingMatrix = trainingMatrix - mean.reshape(m, 1)
@@ -88,10 +102,10 @@ def _denoise_image(img, K, L, sig, log):
         each.wait()
 
     # non-parallel:
-    # for x in range(0, width):
+    # for x in range(halfK, width - halfK):
     #     if log:
     #         print(x)
-    #     for y in range(0, height):
+    #     for y in range(halfK, height - halfK):
     #         outImg[x, y] = _denoise_pixel(img, x, y, K, L, sig)
 
     return outImg
