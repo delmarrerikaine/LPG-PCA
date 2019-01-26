@@ -23,8 +23,11 @@ def _denoise_pixel(img, x, y, K, L, sig):
 
     # Assemble a pool of blocks.
     dim1, dim2 = img.shape
-    blocks = image.extract_patches_2d(img[max(K, x - halfL):min(x + halfL + 1, dim2 - K),
-                                          max(K, y - halfL):min(y + halfL + 1, dim1-K)], (K, K))
+    rng = halfL - halfK
+    blocks = image.extract_patches_2d(
+        img[max(K, x - rng) - halfK : min(x + rng + 1, dim2 - K) + halfK,
+        max(K, y - rng) - halfK : min(y + rng + 1, dim1 - K) + halfK], (K, K))
+    
     # Sort by MSE
     sortIndexes = ((blocks - target)**2).reshape(blocks.shape[0], m, order = 'F').mean(axis = 1).argsort()
 
@@ -99,10 +102,10 @@ def _denoise_image(img, K, L, sig, log):
         each.wait()
 
     # non-parallel:
-    # for x in range(0, width):
+    # for x in range(halfK, width - halfK):
     #     if log:
     #         print(x)
-    #     for y in range(0, height):
+    #     for y in range(halfK, height - halfK):
     #         outImg[x, y] = _denoise_pixel(img, x, y, K, L, sig)
 
     return outImg
