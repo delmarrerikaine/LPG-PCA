@@ -4,6 +4,8 @@ import os
 from sklearn.feature_extraction import image
 
 
+cores_count = os.cpu_count() - 1 # don't use all cores, your UI may start to lag
+
 def _denoise_pixel(img, x, y, K, L, sig):
     def getBlock(x, y):
         return img[x - halfK: x + halfK + 1, y - halfK: y + halfK + 1]
@@ -34,26 +36,6 @@ def _denoise_pixel(img, x, y, K, L, sig):
     # Construct the training matrix with the target and the best blocks reshaped into columns.
     trainingMatrix = blocks[sortIndexes].reshape(blocks.shape[0], m, order = 'F').swapaxes(1, 0)[:,:n+1]
 
-#    # Assemble a pool of blocks.
-#    dim1, dim2 = img.shape
-#    blocks = []
-#    rng = halfL - halfK
-#    for ty in range(max(K, y-rng), min(y+rng+1, dim1-K)):
-#        for tx in range(max(K, x-rng), min(x+rng+1, dim2-K)):
-#            # Exclude target
-#            if tx == x and ty == y:
-#                continue
-#            block = getBlock(tx, ty)
-#            blocks.append(block)
-#
-#    blocks.sort(key=mse)
-#
-#    # Construct the training matrix with the target and the best blocks reshaped into columns.
-#    if len(blocks) < n:
-#        n = len(blocks)
-#    trainingMatrix = np.hstack((target.reshape(m, 1, order='F'),
-#                                np.transpose([np.array(block).reshape(m, order='F') for block in blocks[:n]])))
-
     mean = trainingMatrix.mean(axis=1)
     trainingMatrix = trainingMatrix - mean.reshape(m, 1)
     noiseCov = sig**2 * np.eye(m, m)
@@ -73,11 +55,9 @@ def _denoise_pixel(img, x, y, K, L, sig):
     return X1[m//2]
 
 
-def _denoise_row(img, x, left_y, right_y, K, L, sig, log):
-    if log:
-        print(x)
-    return (x, left_y, right_y,
-            [_denoise_pixel(img, x, y, K, L, sig) for y in range(left_y, right_y)])
+def _denoise_patch(img, left_x, right_x, left_y, right_y, K, L, sig, log):
+    return [(x, left_y, right_y, [_denoise_pixel(img, x, y, K, L, sig) for y in range(left_y, right_y)]) 
+            for x in range(left_x, right_x)]
 
 
 def _denoise_image(img, K, L, sig, log):
@@ -88,18 +68,33 @@ def _denoise_image(img, K, L, sig, log):
     halfL = L // 2
     halfK = K // 2
 
-    def denoiseRowCallback(result):
+    def denoisePatchCallback(result): # [x, left_y, right_y, values]
         global outImg
 
-        x, y_left, y_right, data = result
-        outImg[x, y_left:y_right] = data
+        for elem in result:
+            x, y_left, y_right, data = elem
+            outImg[x, y_left:y_right] = data
 
     global pool
+    global cores_count
 
     # parallel
-    progress = [pool.apply_async(_denoise_row, (img, x, halfK, height - halfK, K, L, sig, log,), callback=denoiseRowCallback) for x in range(halfK, width - halfK)]
-    for each in progress:
-        each.wait()
+    partitions = np.linspace(halfK, width - halfK, num=cores_count + 1)
+    progress = np.array([])
+
+    for i, partition in enumerate(partitions):
+        if(i == cores_count):
+            continue
+
+        left_x = int(partitions[i])
+        right_x = int(partitions[i + 1])
+        left_y = halfK
+        right_y = height - halfK
+
+        pool.apply_async(_denoise_patch, (img, left_x, right_x, left_y, right_y, K, L, sig, log,), callback=denoisePatchCallback)
+
+    pool.close()
+    pool.join()
 
     # non-parallel:
     # for x in range(halfK, width - halfK):
@@ -113,14 +108,17 @@ def _denoise_image(img, K, L, sig, log):
 
 def denoise(noised_img, sig1, K=3, L=21, log=False):
     global pool
+    global cores_count
 
-    pool = Pool(os.cpu_count() - 1) # don't use all cores, your UI may start to lag
+    pool = Pool(cores_count)
 
     stage1 = _denoise_image(noised_img, K, L, sig1, log)
 
     sig2 = 0.35 * np.sqrt(sig1 - np.mean((stage1 - noised_img)**2))
     if log:
         print('sig2 = ', sig2)
+
+    pool = Pool(cores_count)
 
     stage2 = _denoise_image(stage1, K, L, sig2, log)
 
